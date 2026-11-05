@@ -1,0 +1,21 @@
+import fs from 'node:fs';
+import path from 'node:path';
+const root = path.resolve(import.meta.dirname, '..');
+const source = path.join(root, 'source');
+let html = fs.readFileSync(path.join(source, 'index.html'), 'utf8');
+let css = fs.readFileSync(path.join(source, 'style.css'), 'utf8');
+let app = fs.readFileSync(path.join(source, 'app.js'), 'utf8');
+app = app.replace(/const initial = \[[\s\S]*?\n\];/, 'const initial = [];');
+if (!app.includes('const initial = [];')) throw new Error('Personal portfolio seed was not removed');
+html = html.replace('</head>', '<script>window.__PUBLIC_TEMPLATE__=true</script></head>');
+html = html.replace(/(<strong id="total-value">)[^<]*(<\/strong>)/, '$1--$2');
+html = html.replace(/(<span id="account-[ab]-total">)[^<]*(<\/span>)/g, '$1--$2');
+html = html.replace(/(<span class="account-badge">)[^<]*(<\/span>)/g, (_, open, close) => `${open}0 笔${close}`);
+html = html.replace('截图初始数据', '公开模板').replace('两账户持仓基准', '我的持仓').replace('按截图录入，待补基金份额后可计算最新市值', '添加基金或导入个人持仓后显示');
+html = html.replace('截图 1 · ', '').replace('截图 2 · ', '');
+html = html.replace('两张截图的 13 笔', '个人');
+const template = fs.readFileSync(path.join(root, 'worker', 'template.js'), 'utf8');
+const result = template.replace('__HTML_JSON__', JSON.stringify(html)).replace('__CSS_JSON__', JSON.stringify(css)).replace('__APP_JSON__', JSON.stringify(app));
+fs.writeFileSync(path.join(root, 'worker', 'index.js'), result);
+console.log('Generated shareable Worker without personal holdings');
+
