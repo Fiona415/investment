@@ -1,0 +1,9 @@
+dist/
+site.tar.gz
+.share-check/
+.hosted-check/
+.hosted-final-check/
+.jsonp-test/
+*.png
+outputs/
+
