@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0b1017">
+  <title>持仓罗盘 · 基金与市场观察</title>
+  <meta name="description" content="本地基金持仓和 A 股市场动态观察看板">
+  <link rel="stylesheet" href="./style.css">
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      if (location.protocol === 'file:') {
+        document.body.innerHTML = '<main class="file-guide"><div class="file-guide-card"><span class="eyebrow">启动方式</span><h1>请通过“启动看板.cmd”打开</h1><p>你现在打开的是本地 HTML 文件。动态行情、基金净值和新闻需要本地服务运行。</p><ol><li>返回上一级“基金持仓与市场动态看板”文件夹。</li><li>双击 <strong>启动看板.cmd</strong>，保留弹出的命令行窗口。</li><li>浏览器会自动打开看板；也可以访问下面的地址。</li></ol><a class="primary" href="http://127.0.0.1:4173/">打开 http://127.0.0.1:4173/</a></div></main>';
+        return;
+      }
+      const script = document.createElement('script');
+      script.src = './app.js';
+      document.body.appendChild(script);
+    });
+  </script>
+</head>
+<body>
+  <div class="shell">
+    <aside class="rail">
+      <div class="brand"><span class="brand-mark">◈</span><span>持仓罗盘<small>PORTFOLIO ATLAS</small></span></div>
+      <nav aria-label="页面导航">
+        <a href="#overview" class="active"><span>◫</span> 总览</a>
+        <a href="#market"><span>⌁</span> 今日行情</a>
+        <a href="#holdings"><span>▤</span> 我的持仓</a>
+        <a href="#position-analysis"><span>◇</span> 逐笔分析</a>
+        <a href="#reason"><span>◎</span> 调仓逻辑</a>
+        <a href="#review"><span>◷</span> 交易复盘</a>
+        <a href="#news"><span>↗</span> 政策与新闻</a>
+      </nav>
+      <div class="rail-foot"><span class="live-dot"></span> 本地保存 · 自动更新<br><small>仅供个人观察与情景分析</small></div>
+    </aside>
+    <main>
+      <header class="topbar">
+        <div><span class="eyebrow">YOUR DAILY MARKET BRIEFING</span><h1>每一天，看清持仓与市场。</h1><p>行情、资金、持仓与信号，在一个页面里对齐。</p></div>
+        <div class="top-actions"><div class="timebox"><span>北京时间</span><strong id="clock">--:--:--</strong></div><button id="privacy-toggle" class="secondary" type="button" aria-pressed="false">◉ 隐藏金额</button><button id="refresh" class="primary">↻ &nbsp;刷新数据</button></div>
+      </header>
+
+      <div id="notice" class="notice" role="status">正在连接数据源…</div>
+
+      <section id="overview" class="section overview">
+        <div class="section-title"><div><span class="eyebrow">01 / PORTFOLIO SNAPSHOT</span><h2>资产概览</h2></div><span class="source-tag" id="portfolio-label">公开模板</span></div>
+        <div class="hero-grid">
+          <article class="hero-card"><div class="card-top"><span>我的持仓</span><span class="icon-circle">¥</span></div><strong id="total-value">--</strong><p id="total-sub">添加基金或导入个人持仓后显示</p><div class="hero-spark"><svg viewBox="0 0 700 90" preserveAspectRatio="none" aria-hidden="true"><defs><linearGradient id="wave" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#69dbb2" stop-opacity=".36"/><stop offset="1" stop-color="#69dbb2" stop-opacity="0"/></linearGradient></defs><path d="M0 70 C45 70 65 36 105 49 S167 75 205 51 S270 18 312 36 S380 76 421 43 S478 16 526 37 S603 62 640 32 S682 28 700 17 L700 90 L0 90Z" fill="url(#wave)"/><path d="M0 70 C45 70 65 36 105 49 S167 75 205 51 S270 18 312 36 S380 76 421 43 S478 16 526 37 S603 62 640 32 S682 28 700 17" fill="none" stroke="#72e9bf" stroke-width="2.5"/></svg></div></article>
+          <article class="metric-card"><span>已确认基金代码</span><strong id="verified-count">--</strong><small>未确认的份额不会自动匹配净值</small><div class="mini-progress"><i id="verified-bar"></i></div></article>
+          <article class="metric-card"><span>组合主要风险</span><strong id="risk-label">科技集中</strong><small id="risk-sub">按截图持仓粗分类，仅供核对</small><div class="risk-pills"><span>科技</span><span>黄金</span><span>海外</span></div></article>
+        </div>
+      </section>
+
+      <section id="market" class="section">
+        <div class="section-title"><div><span class="eyebrow">02 / MARKET PULSE</span><h2>今日行情</h2></div><span class="source-tag" id="market-time">等待行情</span></div>
+        <div class="market-grid">
+          <article class="metric-card"><span>上证指数</span><strong id="sh-index">--</strong><small id="sh-change">--</small></article>
+          <article class="metric-card"><span>沪深成交额 / 成交量</span><strong id="turnover">--</strong><small id="volume">截至数据时点 · 不含北交所</small></article>
+          <article class="metric-card"><span>全 A 主力资金净流入</span><strong id="market-net">--</strong><small id="market-net-note">逐只 A 股主力净额汇总估算</small></article>
+          <article class="metric-card sentiment"><span>板块情绪温度</span><strong id="mood">--</strong><small id="breadth">按板块上涨占比估算</small><div class="heatline"><i id="heat-pointer"></i></div></article>
+        </div>
+        <div class="panel flow-panel">
+          <div class="panel-head"><div><h3>板块资金流向</h3><p>主力净额 · 东方财富板块口径</p></div><div class="segmented" role="group" aria-label="资金流向时间范围"><button class="selected" data-period="today">今日</button><button data-period="three">近 3 日</button><button data-period="five">近 5 日</button></div></div>
+          <div class="flow-columns"><div><div class="flow-heading"><span class="green-dot"></span> 流入前五</div><div id="inflow" class="bars skeleton-text">等待数据…</div></div><div><div class="flow-heading"><span class="red-dot"></span> 流出前五</div><div id="outflow" class="bars skeleton-text">等待数据…</div></div></div>
+          <p class="caption">近一周按近 5 个交易日展示。板块之间可能重叠；净额为资金流向估算值，不等于可交易资金，也不可直接相加为全市场净流入。</p>
+        </div>
+        <div class="insight"><span class="insight-icon">✦</span><div><b>信号解读</b><p id="market-insight">收到行情后，结合涨跌、成交额与资金集中程度生成规则化解读。</p></div></div>
+      </section>
+
+      <section id="holdings" class="section">
+        <div class="section-title"><div><span class="eyebrow">03 / YOUR POSITIONS</span><h2>我的持仓</h2></div><div class="section-actions"><button id="confirm-values" class="secondary" type="button">✓ 确认今日金额</button><button id="add-open" class="secondary">＋ 添加基金</button></div></div>
+        <div class="hold-grid"><article class="panel account"><div class="panel-head"><div><span class="account-kicker">ACCOUNT 01</span><h3>灵活持仓账户</h3><p><span id="account-a-total">--</span></p><p class="account-daily" id="account-a-daily">今日盈亏：待核对</p></div><span class="account-badge">0 笔</span></div><div id="account-a-rows" class="fund-rows"></div><div class="account-action" id="account-a-action"></div></article>
+        <article class="panel account"><div class="panel-head"><div><span class="account-kicker">ACCOUNT 02</span><h3>长期定投账户</h3><p><span id="account-b-total">--</span></p><p class="account-daily" id="account-b-daily">今日盈亏：待核对</p></div><span class="account-badge">0 笔</span></div><div id="account-b-rows" class="fund-rows"></div><div class="account-action" id="account-b-action"></div></article></div>
+        <p class="caption holding-caption">公开模板默认无持仓，新增基金后请按交易平台核对金额。当前金额足以计算仓位占比和再平衡参考，持有份额只用于按已公布净值估算市值。以后每天请更新金额，或核对无变化后点击“确认今日金额”。</p>
+      </section>
+
+      <section id="position-analysis" class="section">
+        <div class="section-title"><div><span class="eyebrow">04 / POSITION REVIEW</span><h2>逐笔持仓分析</h2></div><span class="source-tag" id="analysis-time">等待行情</span></div>
+        <div id="position-analysis-list" class="analysis-list"></div>
+        <p class="caption">依据当前输入金额、粗分类仓位和可用行情生成规则化参考；基金份额类别未核实时不使用其他份额的净值。金额是再平衡测算，实际赎回费、到账时间和交易限制请在下单前核对。</p>
+      </section>
+
+      <section id="reason" class="section">
+        <div class="section-title"><div><span class="eyebrow">05 / DECISION FRAMEWORK</span><h2>今日总体调仓</h2></div><span class="source-tag">规则化情景分析</span></div>
+        <div class="reason-grid"><article class="panel reason-main"><div class="reason-title"><span class="reason-symbol">◈</span><div><h3>今天的组合决策</h3><p id="action-status">等待行情</p></div></div><div class="risk-settings"><label>黄金主题观察上限 <input id="gold-limit" type="number" min="5" max="80" step="1" value="25"> %</label><label>海外成长观察上限 <input id="global-limit" type="number" min="5" max="80" step="1" value="40"> %</label></div><div id="action-detail" class="reason-text"></div><div class="rule-note">“观察上限”是你设定的主题仓位提醒线：主题市值 ÷ 组合总市值超过它时，提示检查集中风险；它不是止损线、收益预测或必须卖出的指令。当前规则对该主题最大一笔每次最多测算 10% 的持仓，金额取整至百元；费用、持有期、现金需求由你另行核对。</div></article><div class="reason-side"><article class="panel factor"><span>01 · 基本面</span><h3>长期逻辑</h3><p>科技、制造、黄金与海外资产的驱动因素不同。主题基金可能同时重仓相近公司，不能仅按基金数量判断分散程度。</p></article><article class="panel factor"><span>02 · 技术与价格</span><h3>避免追涨杀跌</h3><p>单日涨跌属于短期噪声。具体买卖须结合交易费用、持有期和现金需求。</p></article><article class="panel factor"><span>03 · 资金面</span><h3>关注持续性</h3><p id="flow-reason">等待今日、近 3 日和近 5 日资金数据。若方向反复，降低单日信号权重。</p></article></div></div>
+      </section>
+
+      <section id="review" class="section"><div class="section-title"><div><span class="eyebrow">06 / TRADE JOURNAL</span><h2>交易记录与复盘</h2></div><span class="source-tag">仅保存在当前浏览器</span></div><div class="review-grid"><article class="panel review-panel"><div class="review-tabs"><button type="button" data-review="week" class="selected">近 7 日</button><button type="button" data-review="month">近 30 日</button><button type="button" data-review="since">卖出后至今</button></div><div id="review-report"></div></article><article class="panel review-panel"><h3>买卖流水</h3><div id="trade-list"></div></article></div><p class="caption">复盘只计算你记录过的操作与页面实际保存过的行情快照；缺少起点行情或基金净值时不估计收益。下单记录不会自动修改已确认持仓。</p></section>
+
+      <section id="news" class="section news-section"><div class="section-title"><div><span class="eyebrow">07 / NEWS & POLICY</span><h2>与你的持仓有关</h2></div><span class="source-tag" id="news-time">等待新闻</span></div><div id="news-list" class="news-grid"><div class="panel empty">正在获取新闻…</div></div><p class="caption">标题与摘要来自 Bing 新闻 RSS；点击链接查看原文和发布日期。新闻相关性由关键词筛选，不代表已核实其投资影响。</p></section>
+      <footer><p>持仓罗盘 · 持仓、交易和复盘数据只保存在当前浏览器，不连接交易账户。<br>投资有风险。无法保证本金不亏损或年化收益达到 20%；页面金额参考不是收益承诺。</p><div><button id="export-data">导出完整备份 JSON</button><button id="import-data">导入 JSON / JPG</button><input id="import-file" type="file" accept="application/json,.json,image/jpeg,.jpg,.jpeg,image/png,.png" hidden></div></footer>
+    </main>
+  </div>
+  <dialog id="fund-dialog"><form method="dialog" id="fund-form"><div class="dialog-head"><div><span class="eyebrow">POSITION EDITOR</span><h2 id="dialog-title">添加基金</h2></div><button class="close" type="button" id="close-dialog" aria-label="关闭">×</button></div><label>所属账户<select id="field-account"><option value="a">灵活持仓账户</option><option value="b">长期定投账户</option></select></label><label>基金代码或名称<input id="field-code" type="text" autocomplete="off" placeholder="输入 6 位代码搜索；未确认可留空"></label><div id="fund-search-results" class="search-results"></div><label>基金名称<input id="field-name" type="text" placeholder="选择搜索结果后自动填写" required></label><div class="form-grid"><label>当前金额 / 元<input id="field-value" type="number" min="0" step="0.01" required></label><label>累计成本 / 元<input id="field-cost" type="number" min="0" step="0.01" placeholder="用于计算累计盈亏"></label><label>持有份额<input id="field-shares" type="number" min="0" step="0.0001" placeholder="用于最新净值估值"></label><label>主题<select id="field-theme"><option value="tech">科技 / 半导体</option><option value="global">海外成长</option><option value="gold">黄金</option><option value="dividend">红利</option><option value="other">其他</option></select></label></div><p class="form-help">份额请以交易平台为准。仅填写金额时，页面沿用手工金额，不会冒充实时市值。</p><input id="field-id" type="hidden"><div class="dialog-actions"><button value="cancel" type="button" id="cancel-dialog" class="secondary">取消</button><button type="submit" class="primary">保存持仓</button></div></form></dialog>
+  <dialog id="trade-dialog"><form id="trade-form"><div class="dialog-head"><div><span class="eyebrow">TRADE JOURNAL</span><h2 id="trade-title">记录操作</h2></div><button class="close" type="button" id="close-trade" aria-label="关闭">×</button></div><p class="form-help" id="trade-position"></p><label>操作<select id="trade-action"><option value="buy">买入</option><option value="sell">卖出</option><option value="hold">按兵不动</option></select></label><div class="form-grid"><label>金额 / 元<input id="trade-amount" type="number" min="0" step="0.01" placeholder="或在右侧选比例"></label><label>占当前持仓的比例<select id="trade-fraction"><option value="">按金额输入</option><option value="0.25">1/4</option><option value="0.333333">1/3</option><option value="0.5">1/2</option><option value="1">全部</option></select></label></div><label>实际下单时间<input id="trade-time" type="datetime-local" required></label><label>交易时间<select id="trade-cutoff"><option value="before">交易日 15:00 前</option><option value="after">15:00 后 / 非交易日</option></select></label><p class="form-help">15:00 仅用于估计申请日；QDII、节假日和销售平台可能另有规则。记录后先列为待确认，不会立即计入正式持仓。</p><input id="trade-position-id" type="hidden"><div class="dialog-actions"><button type="button" class="secondary" id="cancel-trade">取消</button><button type="submit" class="primary">保存记录</button></div></form></dialog>
+  <dialog id="image-dialog"><div class="dialog-head"><div><span class="eyebrow">IMAGE IMPORT</span><h2>核对图片识别结果</h2></div><button class="close" type="button" id="close-image" aria-label="关闭">×</button></div><p class="form-help">图片只在当前浏览器识别，不上传本站；中文 OCR 首次加载可能较慢。请逐项核对基金名称、代码与金额，错误行可删除。</p><div id="image-status" class="form-help"></div><div id="image-rows"></div><div class="dialog-actions"><button type="button" class="secondary" id="add-image-row">＋ 补录一行</button><button type="button" class="secondary" id="cancel-image">取消</button><button type="button" class="primary" id="save-image">导入核对后的持仓</button></div></dialog>
+</body>
+</html>
+
